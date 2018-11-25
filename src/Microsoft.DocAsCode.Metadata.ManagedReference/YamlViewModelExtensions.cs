@@ -77,7 +77,7 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
                 Type = item.Type,
                 Items = null
             };
-            if (item.Type == MemberType.Toc || item.Type == MemberType.Namespace)
+            if (item.Type == MemberType.Toc || item.Type == MemberType.Namespace || item.Type == MemberType.Class)
             {
                 if (item.Items != null)
                 {
@@ -123,6 +123,7 @@ namespace Microsoft.DocAsCode.Metadata.ManagedReference
             {
                 case MemberType.Toc:
                 case MemberType.Namespace:
+                case MemberType.Class:
                     var result = new List<TocItemViewModel>();
                     foreach (var child in item.Items)
                     {
