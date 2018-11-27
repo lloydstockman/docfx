@@ -1,4 +1,6 @@
-﻿namespace Microsoft.DocAsCode.Plugins
+﻿using System.Linq;
+
+namespace Microsoft.DocAsCode.Plugins
 {
     using System;
     using System.Collections.Generic;
@@ -96,20 +98,24 @@
                 throw new ArgumentOutOfRangeException(nameof(parallelism));
             }
             DocumentException firstException = null;
-            Parallel.ForEach(
-                elements,
-                new ParallelOptions { MaxDegreeOfParallelism = parallelism },
-                s =>
+
+            var elementsArr = elements.ToArray();
+            var tasks = Enumerable.Range(0, elementsArr.Length).Select(i =>
+                Task.Run(() =>
                 {
                     try
                     {
-                        action(s);
+                        action(elementsArr[i]);
                     }
                     catch (DocumentException ex)
                     {
                         Interlocked.CompareExchange(ref firstException, ex, null);
                     }
-                });
+                })
+            ).ToArray();
+
+            Task.WaitAll(tasks);
+
             if (firstException != null)
             {
                 throw new DocumentException(firstException.Message, firstException);
